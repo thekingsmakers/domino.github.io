@@ -1,0 +1,27 @@
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.player-score {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.score-input {
+    max-width: 120px;
+}
+
+.history-entry {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
