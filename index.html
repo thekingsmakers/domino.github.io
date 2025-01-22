@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domino Score Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .domino {
+            position: fixed;
+            width: 60px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            animation: dominoSlide 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes dominoSlide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200vw); }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .twitter-link {
+            color: #1DA1F2;
+            transition: transform 0.3s ease;
+        }
+
+        .twitter-link:hover {
+            transform: scale(1.1);
+            text-decoration: none;
+        }
+
+        .history-table {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .rounds-cell {
+            max-width: 200px;
+            white-space: pre-wrap;
+        }
+
+        .danger-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .danger-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .player-name-input {
+                margin-bottom: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Dominos -->
+    <div class="domino" style="top: 20%; animation-delay: 0s;"></div>
+    <div class="domino" style="top: 50%; animation-delay: 5s;"></div>
+    <div class="domino" style="top: 80%; animation-delay: 10s;"></div>
+
+    <div class="container py-4">
+        <!-- Header -->
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-primary">🎲 Domino Tracker</h1>
+            <a href="https://x.com/thekingsmakers" target="_blank" class="twitter-link">
+                <i class="fab fa-twitter fa-2x"></i>
+            </a>
+        </header>
+
+        <!-- Game Setup -->
+        <div class="card mb-4 shadow">
+            <div class="card-body">
+                <h2 class="mb-3">Game Setup</h2>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <select id="playerCount" class="form-select" onchange="createPlayerInputs()">
+                            <option value="2">2 Players</option>
+                            <option value="3">3 Players</option>
+                            <option value="4" selected>4 Players</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8 row g-2" id="playerNames"></div>
+                </div>
+                <button class="btn btn-primary mt-3" onclick="startGame()">Start Game</button>
+            </div>
+        </div>
+
+        <!-- Current Game -->
+        <div class="card mb-4 shadow" id="gameSection" style="display: none;">
+            <div class="card-body">
+                <h2 class="mb-3">Current Game</h2>
+                <div id="scoreboard" class="mb-4"></div>
+                <div class="row g-3 mb-4" id="scoreInputs"></div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success" onclick="addRound()">Add Round</button>
+                    <button class="btn btn-danger" onclick="finalizeGame()">End Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game History -->
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="mb-0">Game History</h2>
+                    <button class="btn danger-btn" onclick="showClearHistoryModal()">
+                        <i class="fas fa-trash"></i> Clear All
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Players</th>
+                                <th>Rounds</th>
+                                <th>Totals</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gameHistory">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-4 text-white">
+            <p>© 2024 by thekingsmaker</p>
+            <a href="https://x.com/thekingsmakers" target="_blank" class="twitter-link">
+                <i class="fab fa-twitter"></i> Follow on X
+            </a>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="completeModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Game Complete! 🎉</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="completeModalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="clearHistoryModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">⚠️ Clear All History?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    This will permanently delete all game records. Are you sure?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn danger-btn" onclick="clearAllHistory()">Delete All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentGame = {
+            players: [],
+            rounds: [],
+            totals: []
+        };
+        let gameHistory = JSON.parse(localStorage.getItem('dominoHistory')) || [];
+
+        function createPlayerInputs() {
+            const count = parseInt(document.getElementById('playerCount').value);
+            const container = document.getElementById('playerNames');
+            container.innerHTML = Array.from({length: count}, (_, i) => `
+                <div class="col player-name-input">
+                    <input type="text" class="form-control" 
+                           id="player${i+1}" placeholder="Player ${i+1} Name">
+                </div>
+            `).join('');
+        }
+
+        function startGame() {
+            const count = parseInt(document.getElementById('playerCount').value);
+            currentGame.players = Array.from({length: count}, (_, i) => ({
+                name: document.getElementById(`player${i+1}`).value || `Player ${i+1}`,
+                score: 0
+            }));
+            
+            currentGame.rounds = [];
+            currentGame.totals = Array(count).fill(0);
+            
+            document.getElementById('gameSection').style.display = 'block';
+            updateScoreboard();
+            createScoreInputs();
+        }
+
+        function createScoreInputs() {
+            const container = document.getElementById('scoreInputs');
+            container.innerHTML = currentGame.players.map((player, i) => `
+                <div class="col">
+                    <input type="number" class="form-control"
+                           id="score${i+1}" placeholder="${player.name}'s Score" min="0">
+                </div>
+            `).join('');
+        }
+
+        function addRound() {
+            const scores = currentGame.players.map((_, i) => {
+                const value = parseInt(document.getElementById(`score${i+1}`).value) || 0;
+                currentGame.totals[i] += value;
+                return value;
+            });
+            
+            currentGame.rounds.push(scores);
+            updateScoreboard();
+            clearInputs();
+            
+            const winnerIndex = currentGame.totals.findIndex(score => score >= 100);
+            if(winnerIndex !== -1) showGameComplete(winnerIndex);
+        }
+
+        function showGameComplete(winnerIndex) {
+            const winner = currentGame.players[winnerIndex];
+            const modalBody = document.getElementById('completeModalBody');
+            
+            modalBody.innerHTML = `
+                <h5 class="mb-3">🏆 Winner: ${winner.name} (${currentGame.totals[winnerIndex]} points)</h5>
+                <div class="list-group">
+                    ${currentGame.players.map((player, i) => `
+                        <div class="list-group-item d-flex justify-content-between">
+                            <span>${player.name}</span>
+                            <span class="badge bg-primary">${currentGame.totals[i]}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            new bootstrap.Modal('#completeModal').show();
+            triggerConfetti();
+            finalizeGame();
+        }
+
+        function triggerConfetti() {
+            const defaults = {
+                spread: 360,
+                ticks: 70,
+                gravity: 0,
+                decay: 0.95,
+                startVelocity: 30
+            };
+
+            for(let i = 0; i < 5; i++) {
+                confetti({
+                    ...defaults,
+                    particleCount: 50,
+                    origin: { x: Math.random(), y: Math.random() }
+                });
+            }
+        }
+
+        function finalizeGame() {
+            const gameEntry = {
+                date: new Date().toLocaleString(),
+                players: currentGame.players.map(p => p.name),
+                rounds: currentGame.rounds,
+                totals: [...currentGame.totals]
+            };
+            
+            gameHistory.unshift(gameEntry);
+            localStorage.setItem('dominoHistory', JSON.stringify(gameHistory));
+            
+            updateHistoryDisplay();
+            document.getElementById('gameSection').style.display = 'none';
+        }
+
+        function updateScoreboard() {
+            document.getElementById('scoreboard').innerHTML = `
+                <div class="d-flex flex-wrap gap-3">
+                    ${currentGame.players.map((player, i) => `
+                        <div class="bg-primary text-white px-3 py-2 rounded-pill">
+                            ${player.name}: <strong>${currentGame.totals[i]}</strong>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function updateHistoryDisplay() {
+            document.getElementById('gameHistory').innerHTML = gameHistory.map(game => `
+                <tr>
+                    <td>${game.date}</td>
+                    <td>${game.players.join(', ')}</td>
+                    <td class="rounds-cell">${game.rounds.map((r, i) => 
+                        `Round ${i+1}: ${r.join(' - ')}`).join('\n')}
+                    </td>
+                    <td>${game.players.map((p, i) => 
+                        `${p}: ${game.totals[i]}`).join('<br>')}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function clearInputs() {
+            currentGame.players.forEach((_, i) => {
+                document.getElementById(`score${i+1}`).value = '';
+            });
+        }
+
+        function showClearHistoryModal() {
+            new bootstrap.Modal('#clearHistoryModal').show();
+        }
+
+        function clearAllHistory() {
+            gameHistory = [];
+            localStorage.setItem('dominoHistory', JSON.stringify(gameHistory));
+            updateHistoryDisplay();
+            new bootstrap.Modal('#clearHistoryModal').hide();
+        }
+
+        // Initialize
+        createPlayerInputs();
+        updateHistoryDisplay();
+    </script>
+</body>
+</html>
