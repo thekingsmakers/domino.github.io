@@ -3,90 +3,430 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Under Construction</title>
+    <title>Omar Domino - Premium Edition</title>
     <style>
+        :root {
+            --primary: #2A2E37;
+            --secondary: #3A3F4B;
+            --accent: #FFD700;
+            --domino: #F5F5F5;
+            --text: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .header {
             text-align: center;
-            margin: 20px;
+            margin-bottom: 3rem;
+            position: relative;
         }
-        h1 {
-            color: #333;
+
+        .title {
+            font-size: 3.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));
         }
-        .progress-container {
-            margin: 20px auto;
-            width: 80%;
-            max-width: 600px;
-            height: 20px;
-            background: #f3f3f3;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #ddd;
+
+        .player-area {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .progress-bar {
-            height: 100%;
-            width: 60%; /* Set this to the percentage of progress */
-            background: #4caf50;
-            transition: width 0.5s ease-in-out;
+
+        .board {
+            position: relative;
+            min-height: 200px;
+            margin: 4rem 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            transition: all 0.3s ease;
         }
-        .contact {
-            margin: 20px;
-            font-size: 1.2em;
-        }
-        button {
-            padding: 10px 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
+
+        .domino {
+            background: var(--domino);
+            width: 120px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            position: relative;
             cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            overflow: hidden;
         }
-        button:hover {
-            background: #0056b3;
+
+        .domino::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 80%;
+            background: #333;
+            left: 50%;
+            top: 10%;
+            transform: translateX(-1px);
         }
-        .game {
-            margin-top: 30px;
+
+        .domino:hover {
+            transform: translateY(-5px) rotate(-2deg);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
         }
-        .game h2 {
-            margin-bottom: 10px;
+
+        .domino.highlight {
+            animation: glow 1.5s infinite alternate;
         }
-        .counter {
-            font-size: 2em;
-            color: #4caf50;
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(255,215,0,0.4); }
+            to { box-shadow: 0 0 20px rgba(255,215,0,0.8); }
+        }
+
+        .half {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 0.5rem;
+            position: relative;
+        }
+
+        .pip {
+            width: 10px;
+            height: 10px;
+            background: #333;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: var(--primary);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+        }
+
+        .player-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .player-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .domino-count {
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        /* Advanced Pip Positioning */
+        .pip.center { transform: translate(-50%, -50%); left: 50%; top: 50%; }
+        .pip.top { top: 20%; left: 50%; transform: translateX(-50%); }
+        .pip.bottom { bottom: 20%; left: 50%; transform: translateX(-50%); }
+        .pip.left { left: 20%; top: 50%; transform: translateY(-50%); }
+        .pip.right { right: 20%; top: 50%; transform: translateY(-50%); }
+        .pip.top-left { top: 20%; left: 20%; }
+        .pip.top-right { top: 20%; right: 20%; }
+        .pip.bottom-left { bottom: 20%; left: 20%; }
+        .pip.bottom-right { bottom: 20%; right: 20%; }
+
+        /* Floating Animation */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .board-domino {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 1rem;
+            }
+            
+            .domino {
+                width: 80px;
+                height: 40px;
+            }
+            
+            .pip {
+                width: 6px;
+                height: 6px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Website Under Construction</h1>
-    <p>We are working hard to build something amazing!</p>
+    <div class="game-container">
+        <header class="header">
+            <h1 class="title">Omar Domino</h1>
+        </header>
 
-    <!-- Progress Bar -->
-    <div class="progress-container">
-        <div class="progress-bar"></div>
-    </div>
+        <!-- Player 1 Area -->
+        <div class="player-area" id="player1-area">
+            <div class="player-info">
+                <span class="player-name">Player 1</span>
+                <span class="domino-count">Dominoes: 7</span>
+            </div>
+            <div class="domino-hand"></div>
+        </div>
 
-    <!-- Contact Information -->
-    <div class="contact">
-        Please contact us on WhatsApp: 
-        <a href="https://wa.me/15642124397" target="_blank">+1 (564) 212-4397</a>
-    </div>
+        <!-- Game Board -->
+        <div class="board" id="board"></div>
 
-    <!-- Game Section -->
-    <div class="game">
-        <h2>Click the Button Game</h2>
-        <p>How many times can you click the button?</p>
-        <button onclick="incrementCounter()">Click Me!</button>
-        <p>Score: <span class="counter" id="counter">0</span></p>
+        <!-- Player 2 Area -->
+        <div class="player-area" id="player2-area">
+            <div class="player-info">
+                <span class="player-name">Player 2</span>
+                <span class="domino-count">Dominoes: 7</span>
+            </div>
+            <div class="domino-hand"></div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="controls">
+            <button class="btn" id="new-game">New Game</button>
+            <button class="btn" id="draw-tile">Draw Tile</button>
+            <button class="btn" id="skip-turn">Skip Turn</button>
+        </div>
     </div>
 
     <script>
-        // JavaScript for the game
-        let counter = 0;
+        class OmarDomino {
+            constructor() {
+                this.players = [[], []];
+                this.currentPlayer = 0;
+                this.board = [];
+                this.boneyard = [];
+                this.ends = [];
+                this.initGame();
+            }
 
-        function incrementCounter() {
-            counter++;
-            document.getElementById("counter").textContent = counter;
+            initGame() {
+                this.createDominoSet();
+                this.shuffleDominoes();
+                this.dealDominoes();
+                this.setupInitialPlay();
+                this.renderGame();
+                this.setupEventListeners();
+            }
+
+            createDominoSet() {
+                this.boneyard = [];
+                for (let i = 0; i <= 6; i++) {
+                    for (let j = i; j <= 6; j++) {
+                        this.boneyard.push({ left: i, right: j });
+                    }
+                }
+            }
+
+            shuffleDominoes() {
+                for (let i = this.boneyard.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.boneyard[i], this.boneyard[j]] = [this.boneyard[j], this.boneyard[i]];
+                }
+            }
+
+            dealDominoes() {
+                this.players = this.players.map(() => []);
+                for (let i = 0; i < 7; i++) {
+                    this.players[0].push(this.boneyard.pop());
+                    this.players[1].push(this.boneyard.pop());
+                }
+            }
+
+            setupInitialPlay() {
+                const highestDouble = this.findHighestDouble();
+                if (highestDouble) {
+                    this.board.push(highestDouble);
+                    this.ends = [highestDouble.left, highestDouble.right];
+                    this.removeFromPlayer(highestDouble);
+                }
+            }
+
+            findHighestDouble() {
+                for (let value = 6; value >= 0; value--) {
+                    for (let player of this.players) {
+                        const domino = player.find(d => d.left === value && d.right === value);
+                        if (domino) return domino;
+                    }
+                }
+                return null;
+            }
+
+            removeFromPlayer(domino) {
+                this.players[this.currentPlayer] = this.players[this.currentPlayer].filter(
+                    d => !(d.left === domino.left && d.right === domino.right)
+                );
+            }
+
+            renderGame() {
+                this.renderPlayerAreas();
+                this.renderBoard();
+                this.updateUI();
+            }
+
+            renderPlayerAreas() {
+                this.players.forEach((player, index) => {
+                    const hand = document.querySelectorAll('.domino-hand')[index];
+                    hand.innerHTML = '';
+                    player.forEach(domino => {
+                        const dominoEl = this.createDominoElement(domino);
+                        dominoEl.addEventListener('click', () => this.handleDominoClick(domino));
+                        hand.appendChild(dominoEl);
+                    });
+                });
+            }
+
+            createDominoElement(domino) {
+                const el = document.createElement('div');
+                el.className = 'domino';
+                el.innerHTML = `
+                    <div class="half">${this.generatePips(domino.left)}</div>
+                    <div class="half">${this.generatePips(domino.right)}</div>
+                `;
+                return el;
+            }
+
+            generatePips(value) {
+                const positions = {
+                    0: '',
+                    1: '<div class="pip center"></div>',
+                    2: '<div class="pip top-left"></div><div class="pip bottom-right"></div>',
+                    3: '<div class="pip top-left"></div><div class="pip center"></div><div class="pip bottom-right"></div>',
+                    4: '<div class="pip top-left"></div><div class="pip top-right"></div><div class="pip bottom-left"></div><div class="pip bottom-right"></div>',
+                    5: '<div class="pip top-left"></div><div class="pip top-right"></div><div class="pip center"></div><div class="pip bottom-left"></div><div class="pip bottom-right"></div>',
+                    6: '<div class="pip top-left"></div><div class="pip top-right"></div><div class="pip left"></div><div class="pip right"></div><div class="pip bottom-left"></div><div class="pip bottom-right"></div>'
+                };
+                return positions[value] || '';
+            }
+
+            renderBoard() {
+                const board = document.getElementById('board');
+                board.innerHTML = '';
+                this.board.forEach(domino => {
+                    const dominoEl = this.createDominoElement(domino);
+                    dominoEl.classList.add('board-domino');
+                    dominoEl.style.animationDelay = `${Math.random() * 2}s`;
+                    board.appendChild(dominoEl);
+                });
+            }
+
+            updateUI() {
+                document.querySelectorAll('.player-area').forEach((area, index) => {
+                    area.style.opacity = index === this.currentPlayer ? 1 : 0.6;
+                    area.querySelector('.domino-count').textContent = 
+                        `Dominoes: ${this.players[index].length}`;
+                });
+            }
+
+            handleDominoClick(domino) {
+                if (this.isValidMove(domino)) {
+                    this.playDomino(domino);
+                    this.nextTurn();
+                }
+            }
+
+            isValidMove(domino) {
+                return domino.left === this.ends[0] || domino.right === this.ends[0] ||
+                       domino.left === this.ends[1] || domino.right === this.ends[1];
+            }
+
+            playDomino(domino) {
+                this.board.push(domino);
+                this.ends = [domino.left, domino.right];
+                this.removeFromPlayer(domino);
+                
+                if (this.players[this.currentPlayer].length === 0) {
+                    this.showGameOver();
+                }
+                
+                this.renderGame();
+            }
+
+            showGameOver() {
+                alert(`Player ${this.currentPlayer + 1} wins!`);
+                this.initGame();
+            }
+
+            nextTurn() {
+                this.currentPlayer = (this.currentPlayer + 1) % 2;
+                this.updateUI();
+            }
+
+            setupEventListeners() {
+                document.getElementById('new-game').addEventListener('click', () => this.initGame());
+                document.getElementById('skip-turn').addEventListener('click', () => this.nextTurn());
+                document.getElementById('draw-tile').addEventListener('click', () => this.drawTile());
+            }
+
+            drawTile() {
+                if (this.boneyard.length > 0) {
+                    this.players[this.currentPlayer].push(this.boneyard.pop());
+                    this.renderGame();
+                }
+            }
         }
+
+        // Initialize the game
+        const game = new OmarDomino();
     </script>
 </body>
 </html>
