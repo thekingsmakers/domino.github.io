@@ -1,432 +1,462 @@
-<!DOCTYPE html>
-<html lang="en">
+#<!DOCTYPE html>
+#<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Omar Domino - Premium Edition</title>
+    <title>Domino Score Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --primary: #2A2E37;
-            --secondary: #3A3F4B;
-            --accent: #FFD700;
-            --domino: #F5F5F5;
-            --text: #FFFFFF;
+            --bg-color: #ffffff;
+            --text-color: #2c3e50;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary-color: #3498db;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ecf0f1;
+            --card-bg: rgba(40, 40, 40, 0.95);
+            --primary-color: #2ecc71;
         }
 
         body {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: var(--text);
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: var(--text-color);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        .game-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-            position: relative;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            position: relative;
-        }
-
-        .title {
-            font-size: 3.5rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(to right, #FFD700, #FFA500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));
-        }
-
-        .player-area {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 2rem 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .board {
-            position: relative;
-            min-height: 200px;
-            margin: 4rem 0;
-            background: rgba(0,0,0,0.2);
-            border-radius: 15px;
-            padding: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            transition: all 0.3s ease;
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .domino {
-            background: var(--domino);
-            width: 120px;
-            height: 60px;
-            border-radius: 8px;
-            display: flex;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            overflow: hidden;
+            position: fixed;
+            width: 60px;
+            height: 120px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            animation: dominoSlide 20s linear infinite;
+            z-index: 0;
         }
 
-        .domino::before {
-            content: '';
-            position: absolute;
-            width: 2px;
-            height: 80%;
-            background: #333;
-            left: 50%;
-            top: 10%;
-            transform: translateX(-1px);
+        @keyframes dominoSlide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200vw); }
         }
 
-        .domino:hover {
-            transform: translateY(-5px) rotate(-2deg);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-        }
-
-        .domino.highlight {
-            animation: glow 1.5s infinite alternate;
-        }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 10px rgba(255,215,0,0.4); }
-            to { box-shadow: 0 0 20px rgba(255,215,0,0.8); }
-        }
-
-        .half {
-            flex: 1;
-            display: grid;
-            place-items: center;
-            padding: 0.5rem;
-            position: relative;
-        }
-
-        .pip {
-            width: 10px;
-            height: 10px;
-            background: #333;
-            border-radius: 50%;
-            position: absolute;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(5px);
             border: none;
-            border-radius: 50px;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: var(--primary);
-            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .news-ticker {
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 0;
+        }
+
+        .news-content {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+            padding-left: 100%;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .winner-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        .history-row {
             cursor: pointer;
             transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+        .history-row:hover {
+            background: rgba(var(--primary-color), 0.1);
         }
 
-        .player-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+        footer {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            margin-top: 3rem;
+            border-radius: 15px;
         }
 
-        .player-name {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--accent);
-        }
-
-        .domino-count {
-            background: rgba(255,255,255,0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-        }
-
-        /* Advanced Pip Positioning */
-        .pip.center { transform: translate(-50%, -50%); left: 50%; top: 50%; }
-        .pip.top { top: 20%; left: 50%; transform: translateX(-50%); }
-        .pip.bottom { bottom: 20%; left: 50%; transform: translateX(-50%); }
-        .pip.left { left: 20%; top: 50%; transform: translateY(-50%); }
-        .pip.right { right: 20%; top: 50%; transform: translateY(-50%); }
-        .pip.top-left { top: 20%; left: 20%; }
-        .pip.top-right { top: 20%; right: 20%; }
-        .pip.bottom-left { bottom: 20%; left: 20%; }
-        .pip.bottom-right { bottom: 20%; right: 20%; }
-
-        /* Floating Animation */
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .board-domino {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .game-container {
-                padding: 1rem;
-            }
-            
-            .domino {
-                width: 80px;
-                height: 40px;
-            }
-            
-            .pip {
-                width: 6px;
-                height: 6px;
-            }
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <header class="header">
-            <h1 class="title">Omar Domino</h1>
-        </header>
+    <!-- Animated Dominos -->
+    <div class="domino" style="top: 20%; animation-delay: 0s;"></div>
+    <div class="domino" style="top: 50%; animation-delay: 5s;"></div>
+    <div class="domino" style="top: 80%; animation-delay: 10s;"></div>
 
-        <!-- Player 1 Area -->
-        <div class="player-area" id="player1-area">
-            <div class="player-info">
-                <span class="player-name">Player 1</span>
-                <span class="domino-count">Dominoes: 7</span>
+    <div class="container py-4">
+        <!-- Breaking News Ticker -->
+        <div class="news-ticker mb-4 rounded">
+            <div class="news-content">
+                <span class="winner-badge me-4">Latest Winner: <span id="latestWinner">-</span></span>
+                • World Domino Championship 2024 Announced • New Record: 50,000 dominoes toppled in Qatar •
+                Professional Player Summit Every Thursday • @thekingsmakers
             </div>
-            <div class="domino-hand"></div>
         </div>
 
-        <!-- Game Board -->
-        <div class="board" id="board"></div>
-
-        <!-- Player 2 Area -->
-        <div class="player-area" id="player2-area">
-            <div class="player-info">
-                <span class="player-name">Player 2</span>
-                <span class="domino-count">Dominoes: 7</span>
+        <!-- Game Setup -->
+        <div class="row g-4">
+            <!-- Setup Column -->
+            <div class="col-lg-4">
+                <div class="card shadow-lg h-100">
+                    <div class="card-body">
+                        <h2 class="mb-4"><i class="fas fa-users me-2"></i>Game Setup</h2>
+                        <div class="mb-3">
+                            <select id="playerCount" class="form-select" onchange="createPlayerInputs()">
+                                <option value="2">2 Players</option>
+                                <option value="3">3 Players</option>
+                                <option value="4" selected>4 Players</option>
+                            </select>
+                        </div>
+                        <div id="playerNames" class="row g-2"></div>
+                        <button class="btn btn-primary w-100 mt-3 py-2" onclick="startGame()">
+                            <i class="fas fa-play me-2"></i>Start Game
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="domino-hand"></div>
+
+            <!-- Current Game -->
+            <div class="col-lg-4">
+                <div class="card shadow-lg h-100" id="gameSection" style="display: none;">
+                    <div class="card-body">
+                        <h2 class="mb-4"><i class="fas fa-gamepad me-2"></i>Current Game</h2>
+                        <div id="scoreboard" class="mb-4"></div>
+                        <div id="scoreInputs" class="row g-2 mb-4"></div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success py-2" onclick="addRound()">
+                                <i class="fas fa-plus-circle me-2"></i>Add Round
+                            </button>
+                            <button class="btn btn-danger py-2" onclick="finalizeGame()">
+                                <i class="fas fa-stop-circle me-2"></i>End Game
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Domino Info -->
+            <div class="col-lg-4">
+                <div class="card shadow-lg h-100">
+                    <div class="card-body">
+                        <h2 class="mb-4"><i class="fas fa-info-circle me-2"></i>Domino Facts</h2>
+                        <div class="scroll-content">
+                            <p class="lead">Originating in 12th century China, dominoes have evolved into a worldwide phenomenon.</p>
+                            <div class="alert alert-primary">
+                                <h5>Legendary Players:</h5>
+                                <ul class="mb-0">
+                                    <li>Alex Lasa (World Champion)</li>
+                                    <li>Maria Gonzalez (European Champion)</li>
+                                    <li>Chen Wei (Asian Domino Master)</li>
+                                </ul>
+                            </div>
+                            <h5 class="mt-4">Basic Rules:</h5>
+                            <ol>
+                                <li>Players take turns placing dominoes</li>
+                                <li>Match ends when a player reaches 100 points</li>
+                                <li>Lowest total score wins</li>
+                                <li>Double-six set contains 28 tiles</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Game Controls -->
-        <div class="controls">
-            <button class="btn" id="new-game">New Game</button>
-            <button class="btn" id="draw-tile">Draw Tile</button>
-            <button class="btn" id="skip-turn">Skip Turn</button>
+        <!-- Game History -->
+        <div class="card shadow-lg mt-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-history me-2"></i>Game History</h2>
+                    <button class="btn btn-danger" onclick="showClearHistoryModal()">
+                        <i class="fas fa-trash me-2"></i>Clear History
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Players</th>
+                                <th>Winner</th>
+                                <th>Score</th>
+                                <th>Rounds</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gameHistoryBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-4">
+            <div class="social-links mb-3">
+                <a href="https://x.com/thekingsmakers" target="_blank" class="btn btn-outline-secondary btn-sm mx-1">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="https://thekingsmakers.github.io/" target="_blank" class="btn btn-outline-secondary btn-sm mx-1">
+                    <i class="fas fa-globe"></i>
+                </a>
+            </div>
+            <small class="text-muted">Created by Omar Osman | © 2024 Domino Tracker Pro</small>
+        </footer>
+    </div>
+
+    <!-- Clear History Modal -->
+    <div class="modal fade" id="clearHistoryModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Clear History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Enter Security Password:</label>
+                        <input type="password" class="form-control" id="clearHistoryPassword">
+                    </div>
+                    <div id="passwordError" class="text-danger d-none">✗ Incorrect password!</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="clearAllHistory()">
+                        <i class="fas fa-trash me-2"></i>Confirm Delete
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Theme Toggle -->
+    <button class="btn btn-primary theme-toggle shadow-lg" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
+    </button>
+
     <script>
-        class OmarDomino {
-            constructor() {
-                this.players = [[], []];
-                this.currentPlayer = 0;
-                this.board = [];
-                this.boneyard = [];
-                this.ends = [];
-                this.initGame();
-            }
+        let currentGame = {
+            players: [],
+            rounds: [],
+            totals: []
+        };
+        let gameHistory = JSON.parse(localStorage.getItem('dominoHistory')) || [];
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
 
-            initGame() {
-                this.createDominoSet();
-                this.shuffleDominoes();
-                this.dealDominoes();
-                this.setupInitialPlay();
-                this.renderGame();
-                this.setupEventListeners();
-            }
+        // Initialize Theme
+        function initializeTheme() {
+            document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+            document.querySelector('.theme-toggle i').className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        initializeTheme();
 
-            createDominoSet() {
-                this.boneyard = [];
-                for (let i = 0; i <= 6; i++) {
-                    for (let j = i; j <= 6; j++) {
-                        this.boneyard.push({ left: i, right: j });
-                    }
-                }
-            }
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('darkMode', isDarkMode);
+            initializeTheme();
+        }
 
-            shuffleDominoes() {
-                for (let i = this.boneyard.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [this.boneyard[i], this.boneyard[j]] = [this.boneyard[j], this.boneyard[i]];
-                }
-            }
+        // Game Functions
+        function createPlayerInputs() {
+            const count = parseInt(document.getElementById('playerCount').value);
+            const container = document.getElementById('playerNames');
+            container.innerHTML = Array.from({length: count}, (_, i) => `
+                <div class="col-12 mb-2">
+                    <input type="text" class="form-control" 
+                           id="player${i+1}" placeholder="Player ${i+1} Name" required>
+                </div>
+            `).join('');
+        }
 
-            dealDominoes() {
-                this.players = this.players.map(() => []);
-                for (let i = 0; i < 7; i++) {
-                    this.players[0].push(this.boneyard.pop());
-                    this.players[1].push(this.boneyard.pop());
-                }
-            }
+        function startGame() {
+            const count = parseInt(document.getElementById('playerCount').value);
+            currentGame.players = Array.from({length: count}, (_, i) => ({
+                name: document.getElementById(`player${i+1}`).value.trim() || `Player ${i+1}`,
+                score: 0
+            }));
+            
+            currentGame.rounds = [];
+            currentGame.totals = Array(count).fill(0);
+            
+            document.getElementById('gameSection').style.display = 'block';
+            updateScoreboard();
+            createScoreInputs();
+        }
 
-            setupInitialPlay() {
-                const highestDouble = this.findHighestDouble();
-                if (highestDouble) {
-                    this.board.push(highestDouble);
-                    this.ends = [highestDouble.left, highestDouble.right];
-                    this.removeFromPlayer(highestDouble);
-                }
-            }
+        function createScoreInputs() {
+            const container = document.getElementById('scoreInputs');
+            container.innerHTML = currentGame.players.map((player, i) => `
+                <div class="col-12 mb-2">
+                    <input type="number" class="form-control" 
+                           id="score${i+1}" placeholder="${player.name}'s Score" min="0" required>
+                </div>
+            `).join('');
+        }
 
-            findHighestDouble() {
-                for (let value = 6; value >= 0; value--) {
-                    for (let player of this.players) {
-                        const domino = player.find(d => d.left === value && d.right === value);
-                        if (domino) return domino;
-                    }
-                }
-                return null;
-            }
-
-            removeFromPlayer(domino) {
-                this.players[this.currentPlayer] = this.players[this.currentPlayer].filter(
-                    d => !(d.left === domino.left && d.right === domino.right)
-                );
-            }
-
-            renderGame() {
-                this.renderPlayerAreas();
-                this.renderBoard();
-                this.updateUI();
-            }
-
-            renderPlayerAreas() {
-                this.players.forEach((player, index) => {
-                    const hand = document.querySelectorAll('.domino-hand')[index];
-                    hand.innerHTML = '';
-                    player.forEach(domino => {
-                        const dominoEl = this.createDominoElement(domino);
-                        dominoEl.addEventListener('click', () => this.handleDominoClick(domino));
-                        hand.appendChild(dominoEl);
-                    });
-                });
-            }
-
-            createDominoElement(domino) {
-                const el = document.createElement('div');
-                el.className = 'domino';
-                el.innerHTML = `
-                    <div class="half">${this.generatePips(domino.left)}</div>
-                    <div class="half">${this.generatePips(domino.right)}</div>
-                `;
-                return el;
-            }
-
-            generatePips(value) {
-                const positions = {
-                    0: '',
-                    1: '<div class="pip center"></div>',
-                    2: '<div class="pip top-left"></div><div class="pip bottom-right"></div>',
-                    3: '<div class="pip top-left"></div><div class="pip center"></div><div class="pip bottom-right"></div>',
-                    4: '<div class="pip top-left"></div><div class="pip top-right"></div><div class="pip bottom-left"></div><div class="pip bottom-right"></div>',
-                    5: '<div class="pip top-left"></div><div class="pip top-right"></div><div class="pip center"></div><div class="pip bottom-left"></div><div class="pip bottom-right"></div>',
-                    6: '<div class="pip top-left"></div><div class="pip top-right"></div><div class="pip left"></div><div class="pip right"></div><div class="pip bottom-left"></div><div class="pip bottom-right"></div>'
-                };
-                return positions[value] || '';
-            }
-
-            renderBoard() {
-                const board = document.getElementById('board');
-                board.innerHTML = '';
-                this.board.forEach(domino => {
-                    const dominoEl = this.createDominoElement(domino);
-                    dominoEl.classList.add('board-domino');
-                    dominoEl.style.animationDelay = `${Math.random() * 2}s`;
-                    board.appendChild(dominoEl);
-                });
-            }
-
-            updateUI() {
-                document.querySelectorAll('.player-area').forEach((area, index) => {
-                    area.style.opacity = index === this.currentPlayer ? 1 : 0.6;
-                    area.querySelector('.domino-count').textContent = 
-                        `Dominoes: ${this.players[index].length}`;
-                });
-            }
-
-            handleDominoClick(domino) {
-                if (this.isValidMove(domino)) {
-                    this.playDomino(domino);
-                    this.nextTurn();
-                }
-            }
-
-            isValidMove(domino) {
-                return domino.left === this.ends[0] || domino.right === this.ends[0] ||
-                       domino.left === this.ends[1] || domino.right === this.ends[1];
-            }
-
-            playDomino(domino) {
-                this.board.push(domino);
-                this.ends = [domino.left, domino.right];
-                this.removeFromPlayer(domino);
-                
-                if (this.players[this.currentPlayer].length === 0) {
-                    this.showGameOver();
-                }
-                
-                this.renderGame();
-            }
-
-            showGameOver() {
-                alert(`Player ${this.currentPlayer + 1} wins!`);
-                this.initGame();
-            }
-
-            nextTurn() {
-                this.currentPlayer = (this.currentPlayer + 1) % 2;
-                this.updateUI();
-            }
-
-            setupEventListeners() {
-                document.getElementById('new-game').addEventListener('click', () => this.initGame());
-                document.getElementById('skip-turn').addEventListener('click', () => this.nextTurn());
-                document.getElementById('draw-tile').addEventListener('click', () => this.drawTile());
-            }
-
-            drawTile() {
-                if (this.boneyard.length > 0) {
-                    this.players[this.currentPlayer].push(this.boneyard.pop());
-                    this.renderGame();
-                }
+        function addRound() {
+            const scores = currentGame.players.map((_, i) => {
+                const input = document.getElementById(`score${i+1}`);
+                const value = Math.max(0, parseInt(input.value) || 0);
+                input.value = '';
+                currentGame.totals[i] += value;
+                return value;
+            });
+            
+            currentGame.rounds.push(scores);
+            updateScoreboard();
+            
+            if(currentGame.totals.some(score => score >= 100)) {
+                finalizeGame();
             }
         }
 
-        // Initialize the game
-        const game = new OmarDomino();
+        function finalizeGame() {
+            const minScore = Math.min(...currentGame.totals);
+            const winnerIndex = currentGame.totals.indexOf(minScore);
+            const winner = currentGame.players[winnerIndex].name;
+
+            const gameEntry = {
+                date: new Date().toLocaleString(),
+                players: currentGame.players.map(p => p.name),
+                rounds: currentGame.rounds,
+                totals: [...currentGame.totals],
+                winner: winner
+            };
+            
+            gameHistory.unshift(gameEntry);
+            localStorage.setItem('dominoHistory', JSON.stringify(gameHistory));
+            updateHistoryDisplay();
+            updateNewsTicker();
+            showGameComplete(winner);
+            document.getElementById('gameSection').style.display = 'none';
+        }
+
+        function showGameComplete(winner) {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function updateScoreboard() {
+            document.getElementById('scoreboard').innerHTML = `
+                <div class="d-flex flex-wrap gap-2">
+                    ${currentGame.players.map((player, i) => `
+                        <div class="badge bg-primary p-2 d-flex align-items-center gap-2">
+                            <span>${player.name}</span>
+                            <span class="badge bg-light text-dark">${currentGame.totals[i]}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function updateHistoryDisplay() {
+            const container = document.getElementById('gameHistoryBody');
+            container.innerHTML = gameHistory.map((game, index) => `
+                <tr class="history-row" data-bs-toggle="collapse" data-bs-target="#details-${index}">
+                    <td>${game.date}</td>
+                    <td>${game.players.join(', ')}</td>
+                    <td><span class="badge bg-success">${game.winner}</span></td>
+                    <td>${Math.min(...game.totals)}</td>
+                    <td>${game.rounds.length}</td>
+                </tr>
+                <tr class="collapse" id="details-${index}">
+                    <td colspan="5">
+                        <div class="p-3 bg-light rounded">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Final Scores:</h6>
+                                    <ul class="list-group">
+                                        ${game.players.map((player, i) => `
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                ${player}
+                                                <span class="text-primary">${game.totals[i]}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Round Details:</h6>
+                                    <div class="small">
+                                        ${game.rounds.map((round, i) => `
+                                            <div class="mb-1">
+                                                <span class="text-muted">Round ${i+1}:</span>
+                                                ${round.join(' - ')}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateNewsTicker() {
+            const winnerSpan = document.getElementById('latestWinner');
+            winnerSpan.textContent = gameHistory[0]?.winner || "No games played yet";
+        }
+
+        function showClearHistoryModal() {
+            document.getElementById('passwordError').classList.add('d-none');
+            document.getElementById('clearHistoryPassword').value = '';
+            new bootstrap.Modal('#clearHistoryModal').show();
+        }
+
+        function clearAllHistory() {
+            const password = document.getElementById('clearHistoryPassword').value;
+            if(password !== '360900') {
+                document.getElementById('passwordError').classList.remove('d-none');
+                return;
+            }
+            
+            gameHistory = [];
+            localStorage.setItem('dominoHistory', JSON.stringify(gameHistory));
+            updateHistoryDisplay();
+            updateNewsTicker();
+            new bootstrap.Modal('#clearHistoryModal').hide();
+        }
+
+        // Initialize
+        createPlayerInputs();
+        updateHistoryDisplay();
+        updateNewsTicker();
     </script>
 </body>
 </html>
